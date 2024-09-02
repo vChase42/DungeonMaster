@@ -1,7 +1,7 @@
 # app.py
 from flask import Flask, Response, render_template, request, redirect, url_for
 from ollama import Client
-from flask_socketio import SocketIO, emit
+# from flask_socketio import SocketIO, emit
 
 from ai_interaction import aiConnection
 
@@ -19,7 +19,7 @@ AI_CONNECTION = aiConnection()
 # })
 
 app = Flask(__name__)
-socketio = SocketIO(app)
+# socketio = SocketIO(app)
 button1_label = "Button 1"
 button2_label = "Button 2"
 
@@ -36,13 +36,21 @@ def clear_history():
     return redirect(url_for('index'))
 
 
-@socketio.on('text_update')
-async  def handle_text_update(textfield_content):
-    async for chunk in AI_CONNECTION.getAiResponseAsync(textfield_content):
-        emit('broadcast_ai_response', {'ai_response_chunk': chunk}, broadcast=True)
+# @socketio.on('text_update')
+# async def handle_text_update(textfield_content):
+#     async for chunk in AI_CONNECTION.getAiResponseAsync(textfield_content):
+#         print("chunk")
+#         emit('broadcast_ai_response', {'ai_response_chunk': chunk}, broadcast=True)
+
+
 
 @app.route('/submit',methods=['POST'])
 def query_submitted():
+    # print("potato")
+    # textfield_content = request.form.get('text_field')
+    # socketio.start_background_task(handle_text_update, {'textfield_content': textfield_content})
+    # return "this"
+    # handle_text_update(textfield_content)
     textfield_content = request.form.get('user_input')
     print(textfield_content)
 

@@ -11,12 +11,8 @@ class aiConnection:
         self.model = os.getenv('MODEL')
         self.client = Client(host = self.url)
         self.sysPrompt = os.getenv('SYSTEM_PROMPT')
-        self.history = self.blankHistory()
+        self.blankHistory()
 
-        
-        
-    
-    
     def testAiConnection(self):
         response = self.client.chat(model='gemma_abl_27b', messages=[
         {
@@ -61,6 +57,7 @@ class aiConnection:
         'role': 'system',
         'content': self.sysPrompt,
     }]
+
 
 if __name__ == '__main__':
     ai = aiConnection()

@@ -14,19 +14,46 @@ The Ultimate Game Box
         input[type="text"] { width: 100%; margin-bottom: 20px; padding: 5px; }
     </style>
 </head>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.0/socket.io.js"></script>
 <script>
-    const socket = io.connect();
-    const textArea = document.getElementById('chat-window');
-    textArea.addEventListener('input', () => {
-            socket.emit('text_update', textArea.value);
-    });
-    socket.on('broadcast_text_update', (data) => {
-        textArea.value += data;
-    });
+    function startStreaming(event) {
+        event.preventDefault();  // Prevent the form from submitting traditionally
 
-        
-</script>
+        const clickedButton = event.submitter.id;
+        const textarea = document.getElementById('chat-window');
+        textarea.value += "-------------------------------------------------\n";  // Clear the textarea
+
+        const user_input = document.getElementById('text_field').value;
+        fetch('/submit', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: new URLSearchParams({
+                    'user_input': user_input,
+                    'button_clicked':clickedButton
+                })
+            })
+            .then(response => {
+                const reader = response.body.getReader();
+                const decoder = new TextDecoder();
+                function readStream() {
+                    reader.read().then(({ done, value }) => {
+                        if (done) {
+                            console.log('Stream complete');
+                            return;
+                        }
+                        const chunk = decoder.decode(value, { stream: true });
+                        textarea.value += chunk;  // Append received data to the textarea
+                        readStream();  // Continue reading the stream
+                    });
+                }
+                readStream();  // Start reading the stream
+            })
+            .catch(error => {
+                console.error('Fetch error:', error);
+            });    }
+    </script>
+
 <body>
     <form onsubmit="startStreaming(event)">
         <textarea id="chat-window"></textarea>
