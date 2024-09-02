@@ -1,0 +1,85 @@
+
+The Ultimate Game Box
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Custom Form</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; }
+        textarea { width: 100%; height: 200px; margin-bottom: 20px; }
+        .button-container { display: flex; justify-content: space-between; margin-bottom: 20px; gap: 10px; }
+        button { padding: 10px 20px; flex-grow: 1; }
+        input[type="text"] { width: 100%; margin-bottom: 20px; padding: 5px; }
+    </style>
+</head>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.0/socket.io.js"></script>
+<script>
+    const socket = io.connect();
+    const textArea = document.getElementById('chat-window');
+    textArea.addEventListener('input', () => {
+            socket.emit('text_update', textArea.value);
+    });
+    socket.on('broadcast_text_update', (data) => {
+        textArea.value += data;
+    });
+
+        
+</script>
+<body>
+    <form onsubmit="startStreaming(event)">
+        <textarea id="chat-window"></textarea>
+        <div class="button-container">
+            <button type="submit" id="button1">{{ button1_label }}</button>
+            <button type="submit" id="button2">{{ button2_label }}</button>
+        </div>
+        <input type="text" id="text_field" placeholder="Enter text here">
+    </form>
+    <form method="POST" action="/clear">
+        <button type="submit" id="clear_button"> Clear Text</button>
+    </form>
+</body>
+</html>
+
+
+
+<!-- <script>
+    function startStreaming(event) {
+        event.preventDefault();  // Prevent the form from submitting traditionally
+
+        const clickedButton = event.submitter.id;
+        const textarea = document.getElementById('chat-window');
+        textarea.value += "-------------------------------------------------\n";  // Clear the textarea
+
+        const user_input = document.getElementById('text_field').value;
+        fetch('/submit', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: new URLSearchParams({
+                    'user_input': user_input,
+                    'button_clicked':clickedButton
+                })
+            })
+            .then(response => {
+                const reader = response.body.getReader();
+                const decoder = new TextDecoder();
+                function readStream() {
+                    reader.read().then(({ done, value }) => {
+                        if (done) {
+                            console.log('Stream complete');
+                            return;
+                        }
+                        const chunk = decoder.decode(value, { stream: true });
+                        textarea.value += chunk;  // Append received data to the textarea
+                        readStream();  // Continue reading the stream
+                    });
+                }
+                readStream();  // Start reading the stream
+            })
+            .catch(error => {
+                console.error('Fetch error:', error);
+            });    }
+    </script> -->
