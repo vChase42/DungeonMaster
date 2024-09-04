@@ -1,13 +1,16 @@
 # app.py
+import os
 from flask import Flask, Response, render_template, request, redirect, url_for
 from ollama import Client
+from dotenv import load_dotenv
 # from flask_socketio import SocketIO, emit
-
+load_dotenv()
 from ai_interaction import aiConnection
 
 
 # Initialize the client
-client = Client(host='http://192.168.1.11:11434')
+client = Client(host=os.getenv('CHAT_AI_URL'))
+#ser
 
 AI_CONNECTION = aiConnection()
 # CHAT_HISTORY = []
