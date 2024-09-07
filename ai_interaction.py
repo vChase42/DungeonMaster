@@ -60,7 +60,7 @@ class aiConnection:
         self.appendHistory(role = 'user',message = newMessage)
         aiResponse = ""
         for chunk in self.client.chat(model=self.model, messages=self.history, stream=True):
-            aiResponse += chunk.get("message").get('content')
+            aiResponse += chunk.get('message').get('content')
             yield f"{chunk.get('message').get('content')}"  # Proper SSE format
         self.appendHistory(role = 'assistant',message = aiResponse)
         
