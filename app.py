@@ -1,49 +1,52 @@
 # app.py
 import os
-from flask import Flask, Response, render_template, request, redirect, url_for
 from ollama import Client
 from dotenv import load_dotenv
-# from flask_socketio import SocketIO, emit
+from flask import Flask, Response, render_template, request, redirect, url_for
+from flask_socketio import SocketIO, emit
+# import eventlet
+import asyncio
+
 load_dotenv()
 from ai_interaction import aiConnection
-
 
 # Initialize the client
 client = Client(host=os.getenv('CHAT_AI_URL'))
 #ser
 
 AI_CONNECTION = aiConnection()
-# CHAT_HISTORY = []
-# SYSTEM_PROMPT = "You are a dungeon master. You will lead the hero on a journey of his choosing. You will tell a story 1 page at a time. You will keep track of the state of the world, and be as realistic as possible. The world is as unexpected as it is boring! Whenever a new character or creature is introduced, brainstorm that entities stats/weaknesses/strengths/personality inside of a <>. You do not need to fill every field. DO NOT PROVIDE ME WITH OPTIONS, USER WILL PROVIDE THEM."
 
-# CHAT_HISTORY.append({
-#     'role': 'system',
-#     'content': SYSTEM_PROMPT,
-# })
-
+# eventlet.monkey_patch()
 app = Flask(__name__)
-# socketio = SocketIO(app)
-button1_label = "Button 1"
-button2_label = "Button 2"
+socketio = SocketIO(app)
+
+
+button1_label = "Tell me a story about scientists and witches"
+button2_label = "Tell me a fantasy story"
 
 @app.route('/', methods=['GET'])
 def index():
-        
     return render_template('index.html',
                            button1_label=button1_label, 
                            button2_label=button2_label)
 
 @app.route('/clear',methods=['POST'])
 def clear_history():
-    AI_CONNECTION.blankHistory()
+    AI_CONNECTION.clearHistory()
     return redirect(url_for('index'))
 
 
-# @socketio.on('text_update')
-# async def handle_text_update(textfield_content):
-#     async for chunk in AI_CONNECTION.getAiResponseAsync(textfield_content):
-#         print("chunk")
-#         emit('broadcast_ai_response', {'ai_response_chunk': chunk}, broadcast=True)
+@socketio.on('text_update')
+def handle_text_update(textfield_content):
+    print("received a query from user")
+    asyncio.run(ai_response(textfield_content))
+
+async def ai_response(textfield_content):
+    async for chunk in AI_CONNECTION.getAiResponseAsync(textfield_content):
+        emit('broadcast_ai_response', {'ai_response_chunk': chunk}, broadcast=True)
+
+    buttonText1, buttonText2 = AI_CONNECTION.getNewButtonText()
+    emit('update_buttons',(buttonText1, buttonText2))
 
 
 
@@ -63,7 +66,7 @@ def query_submitted():
 
 
 if __name__ == '__main__':
-    app.run(debug=True,host="0.0.0.0",port=5000)
+    socketio.run(app,debug=True,host="0.0.0.0",port=5000)
 
 
 

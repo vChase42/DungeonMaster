@@ -11,7 +11,7 @@ class aiConnection:
         self.model = os.getenv('MODEL')
         self.client = Client(host = self.url)
         self.sysPrompt = os.getenv('SYSTEM_PROMPT')
-        self.blankHistory()
+        self.clearHistory()
 
     def testAiConnection(self):
 
@@ -56,7 +56,7 @@ class aiConnection:
         aiResponse = self.client.chat(model = self.model, messages = [{'role':'user','content':newMessage}])
         return(aiResponse['message']['content'])
         
-    def getAiResponseAsync(self, newMessage): 
+    async def getAiResponseAsync(self, newMessage): 
         self.appendHistory(role = 'user',message = newMessage)
         aiResponse = ""
         for chunk in self.client.chat(model=self.model, messages=self.history, stream=True):
@@ -64,11 +64,38 @@ class aiConnection:
             yield f"{chunk.get('message').get('content')}"  # Proper SSE format
         self.appendHistory(role = 'assistant',message = aiResponse)
         
-    def blankHistory(self): #removes all the history of the chat except the system prompt
+    def clearHistory(self): #removes all the history of the chat except the system prompt
         self.history = [{
         'role': 'system',
         'content': self.sysPrompt,
     }]
+        
+    def getNewButtonText(self):
+        
+        story_so_far = self.getStoryOnly()
+        prompt = [{
+            'role':'system',
+            'content': os.getenv('GET_BUTTON_SYS_PROMPT')
+        }]
+        prompt.append({
+            'role': 'user',
+            'content':story_so_far + "\nGENERATE SAMEPLE ACTION 1 in TEN WORDS OR LESS:"
+        })
+        
+        aiResponse = self.client.chat(model=self.model, messages=prompt)['message']['content']
+        
+        prompt[-1]['content'] = story_so_far + "\This is sample action 1: " + aiResponse + "\nGENERATE SAMPLE ACTION 2 in TEN WORDS OR LESS:"
+        
+        aiResponse2 = self.client.chat(model=self.model,messages=prompt)['message']['content']
+        return aiResponse, aiResponse2
+
+    
+    def getStoryOnly(self):
+        the_story = ""
+        for x in self.history:
+            if x['role'] == 'assistant':
+                the_story += x['content'] + "\n"
+        return the_story
 
 
 if __name__ == '__main__':
