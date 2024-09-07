@@ -65,6 +65,7 @@ socket.on('update_buttons',function(button1,button2){
 
     html_button1.innerHTML = button1
     html_button2.innerHTML = button2
+    document.getElementById('text_field').value = "";
 });
 
 function startStreamingIO(event){

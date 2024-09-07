@@ -27,6 +27,7 @@ button2_label = "Tell me a fantasy story"
 @app.route('/', methods=['GET'])
 def index():
     return render_template('index.html',
+                           textarea_story = AI_CONNECTION.getStoryOnly(),
                            button1_label=button1_label, 
                            button2_label=button2_label)
 
@@ -47,6 +48,9 @@ async def ai_response(textfield_content):
 
     buttonText1, buttonText2 = AI_CONNECTION.getNewButtonText()
     emit('update_buttons',(buttonText1, buttonText2))
+    global button1_label,button2_label
+    button1_label = buttonText1
+    button2_label = buttonText2
 
 
 
