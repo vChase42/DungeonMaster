@@ -21,7 +21,7 @@ app = Flask(__name__)
 socketio = SocketIO(app)
 
 
-button1_label = "Tell me a story about scientists and witches"
+button1_label = "begin story"
 button2_label = "Tell me a fantasy story"
 
 @app.route('/', methods=['GET'])
