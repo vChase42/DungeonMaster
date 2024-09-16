@@ -70,7 +70,7 @@ class aiConnection:
         'content': self.sysPrompt,
     }]
         
-    def getNewButtonText(self):
+    def getNewButtonText(self, action_type):
         
         story_so_far = self.getStoryOnly()
         prompt = [{
@@ -78,16 +78,17 @@ class aiConnection:
             'content': os.getenv('GET_BUTTON_SYS_PROMPT')
         }]
         prompt.append({
+            'role': 'assistant',
+            'content':story_so_far
+        })
+        prompt.append({
             'role': 'user',
-            'content':story_so_far + "\nGENERATE SAMEPLE ACTION 1 in TEN WORDS OR LESS:"
+            'content': "\nGENERATE SAMPLE ACTION THAT CAN BE DESCRIBED AS: " + action_type + ", IN TEN WORDS OR LESS:"
         })
         
-        aiResponse = self.client.chat(model=self.model, messages=prompt)['message']['content']
         
-        prompt[-1]['content'] = story_so_far + "\This is sample action 1: " + aiResponse + "\nGENERATE SAMPLE ACTION 2 in TEN WORDS OR LESS:"
+        return self.client.chat(model=self.model, messages=prompt)['message']['content']
         
-        aiResponse2 = self.client.chat(model=self.model,messages=prompt)['message']['content']
-        return aiResponse, aiResponse2
 
     
     def getStoryOnly(self):
